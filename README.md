@@ -1,5 +1,7 @@
 # wait-multi-deployment
 
+[![Tests](https://github.com/iuliancmarcu/wait-multi-deployment/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/iuliancmarcu/wait-multi-deployment/actions/workflows/test.yml)
+
 GitHub Action that waits on multiple deployments of a PR and outputs their URLs
 
 ## This Action is heavily inspired from [@patrickedqvist/wait-for-vercel-preview](https://github.com/patrickedqvist/wait-for-vercel-preview)
