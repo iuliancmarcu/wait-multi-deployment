@@ -3,7 +3,7 @@ export function log(message: string) {
         return;
     }
 
-    console.log(`[wait-multi-deployment] ${message}`);
+    console.log(`[wait-vercel-mono-deployment] ${message}`);
 }
 
 export function logError(e: any) {
@@ -11,5 +11,5 @@ export function logError(e: any) {
         return;
     }
 
-    console.error(`[wait-multi-deployment]`, e);
+    console.error(`[wait-vercel-mono-deployment]`, e);
 }

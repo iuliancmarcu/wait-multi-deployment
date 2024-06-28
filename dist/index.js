@@ -33278,13 +33278,13 @@ function log(message) {
     if (process.env.NODE_ENV === 'test') {
         return;
     }
-    console.log(`[wait-multi-deployment] ${message}`);
+    console.log(`[wait-vercel-mono-deployment] ${message}`);
 }
 function logError(e) {
     if (process.env.NODE_ENV === 'test') {
         return;
     }
-    console.error(`[wait-multi-deployment]`, e);
+    console.error(`[wait-vercel-mono-deployment]`, e);
 }
 
 

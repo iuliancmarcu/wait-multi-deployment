@@ -1,6 +1,6 @@
-# wait-multi-deployment
+# wait-vercel-mono-deployment
 
-[![Tests](https://github.com/iuliancmarcu/wait-multi-deployment/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/iuliancmarcu/wait-multi-deployment/actions/workflows/test.yml)
+[![Tests](https://github.com/iuliancmarcu/wait-vercel-mono-deployment/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/iuliancmarcu/wait-vercel-mono-deployment/actions/workflows/test.yml)
 
 GitHub Action that waits on multiple deployments of a PR and outputs their URLs
 

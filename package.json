@@ -1,5 +1,5 @@
 {
-    "name": "wait-multi-deployment",
+    "name": "wait-vercel-mono-deployment",
     "version": "0.1.0",
     "description": "GitHub Action that waits on multiple deployments of a PR and outputs their URLs",
     "main": "dist/index.js",
@@ -9,7 +9,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com/iuliancmarcu/wait-multi-deployment.git"
+        "url": "git+ssh://git@github.com/iuliancmarcu/wait-vercel-mono-deployment.git"
     },
     "keywords": [
         "github",
@@ -21,9 +21,9 @@
     "author": "Iulian-Constantin Marcu",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/iuliancmarcu/wait-multi-deployment/issues"
+        "url": "https://github.com/iuliancmarcu/wait-vercel-mono-deployment/issues"
     },
-    "homepage": "https://github.com/iuliancmarcu/wait-multi-deployment#readme",
+    "homepage": "https://github.com/iuliancmarcu/wait-vercel-mono-deployment#readme",
     "devDependencies": {
         "@types/jest": "^29.5.12",
         "@types/set-cookie-parser": "^2.4.9",
