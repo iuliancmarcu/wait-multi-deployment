@@ -9,6 +9,7 @@ export interface IInputs {
     checkIntervalMs: number;
     path: string;
     applications?: string;
+    applicationPrefix?: string;
     vercelPassword?: string;
 }
 
@@ -25,6 +26,7 @@ export function getInputs(): IInputs {
     const checkIntervalMs = (Number(core.getInput('check_interval')) || 2) * 1000;
     const actorName = core.getInput('actor_name') || 'vercel[bot]';
     const applications = core.getInput('applications');
+    const applicationPrefix = core.getInput('application_prefix');
 
     if (!githubToken) {
         throw new Error('Input error: Required field `github_token` was not provided');
@@ -44,5 +46,6 @@ export function getInputs(): IInputs {
         path,
         checkIntervalMs,
         applications,
+        applicationPrefix,
     };
 }

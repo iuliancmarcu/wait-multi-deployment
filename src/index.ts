@@ -6,6 +6,7 @@ import { getInputs } from './inputs';
 import { logError } from './utils/log';
 import { getContext } from './utils/context';
 import { waitForDeployment } from './lib/waitForDeployment';
+import { toConstantCase } from './utils/toConstantCase';
 
 export async function run() {
     try {
@@ -20,6 +21,7 @@ export async function run() {
             path,
             vercelPassword,
             applications,
+            applicationPrefix,
         } = getInputs();
 
         const octokit = getOctokit(githubToken);
@@ -64,25 +66,50 @@ export async function run() {
             );
         }
 
-        const { url, jwt } = await waitForDeployment({
-            octokit,
-            owner,
-            repo,
-            sha,
-            environment,
-            actorName,
-            maxTimeoutMs,
-            checkIntervalMs,
-            allowInactiveDeployment,
-            vercelPassword,
-            path,
-        });
+        if (applications && applications.length > 0) {
+            const actualApplications = applications.split(',').map((app) => app.trim());
 
-        // Set outputs for the next steps
-        setOutput('url', url);
+            for (const application of actualApplications) {
+                const { url, jwt } = await waitForDeployment({
+                    octokit,
+                    owner,
+                    repo,
+                    sha: latestCommitSha,
+                    environment,
+                    actorName,
+                    maxTimeoutMs,
+                    checkIntervalMs,
+                    allowInactiveDeployment,
+                    vercelPassword,
+                    path,
+                    application: `${applicationPrefix ?? ''}${application}`,
+                });
 
-        if (jwt) {
-            setOutput('vercel_jwt', jwt);
+                await setActionOutputs({
+                    url,
+                    jwt,
+                    application,
+                });
+            }
+        } else {
+            const { url, jwt } = await waitForDeployment({
+                octokit,
+                owner,
+                repo,
+                sha,
+                environment,
+                actorName,
+                maxTimeoutMs,
+                checkIntervalMs,
+                allowInactiveDeployment,
+                vercelPassword,
+                path,
+            });
+
+            await setActionOutputs({
+                url,
+                jwt,
+            });
         }
     } catch (error: any) {
         // Log the error for debugging
@@ -90,5 +117,25 @@ export async function run() {
 
         // Set the action as failed
         setFailed(error.message);
+    }
+}
+
+async function setActionOutputs({
+    url,
+    jwt,
+    application,
+}: {
+    url: string;
+    jwt?: string;
+    application?: string;
+}) {
+    const urlOutputKey = toConstantCase(application ? `${application}_url` : 'url');
+    const vercelJwtOutputKey = toConstantCase(
+        application ? `${application}_vercel_jwt` : 'vercel_jwt',
+    );
+
+    setOutput(urlOutputKey, url);
+    if (jwt) {
+        setOutput(vercelJwtOutputKey, jwt);
     }
 }

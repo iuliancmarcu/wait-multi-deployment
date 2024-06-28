@@ -36,6 +36,7 @@
         "@actions/core": "^1.10.1",
         "@actions/github": "^6.0.0",
         "axios": "^1.7.2",
+        "constant-case": "^4.0.0",
         "set-cookie-parser": "^2.6.0"
     }
 }

@@ -152,6 +152,22 @@ describe('index - waitMultiDeployment', () => {
         );
     });
 
+    it('fails the action when waitForDeployment fails', async () => {
+        mockGetContext.mockReturnValue({
+            repo: {
+                owner: 'owner',
+                repo: 'repo',
+            },
+            sha: 'sha',
+        } as any);
+
+        mockWaitForDeployment.mockRejectedValue(new Error('failed to wait'));
+
+        await run();
+
+        expect(mockSetFailed).toHaveBeenCalledWith('failed to wait');
+    });
+
     it('should set the vercel_jwt output when one is returned', async () => {
         mockGetContext.mockReturnValue({
             repo: {
@@ -169,23 +185,7 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(mockSetOutput).toHaveBeenCalledWith('vercel_jwt', 'jwt');
-    });
-
-    it('fails the action when waitForDeployment fails', async () => {
-        mockGetContext.mockReturnValue({
-            repo: {
-                owner: 'owner',
-                repo: 'repo',
-            },
-            sha: 'sha',
-        } as any);
-
-        mockWaitForDeployment.mockRejectedValue(new Error('failed to wait'));
-
-        await run();
-
-        expect(mockSetFailed).toHaveBeenCalledWith('failed to wait');
+        expect(mockSetOutput).toHaveBeenCalledWith('VERCEL_JWT', 'jwt');
     });
 
     it('should set the url output when one is returned', async () => {
@@ -204,6 +204,74 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(mockSetOutput).toHaveBeenCalledWith('url', 'http://example.com');
+        expect(mockSetOutput).toHaveBeenCalledWith('URL', 'http://example.com');
+    });
+
+    describe('when applications are provided', () => {
+        it('waits for deployment for each application', async () => {
+            mockGetContext.mockReturnValue({
+                repo: {
+                    owner: 'owner',
+                    repo: 'repo',
+                },
+                sha: 'sha',
+            } as any);
+
+            mockGetInputs.mockReturnValue({
+                ...defaultInputs,
+                applications: 'app1, app2',
+            });
+
+            mockWaitForDeployment.mockResolvedValue({
+                url: 'http://example.com',
+                jwt: 'jwt',
+                path: '/',
+            });
+
+            await run();
+
+            expect(mockWaitForDeployment).toHaveBeenCalledTimes(2);
+            expect(mockWaitForDeployment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    application: 'app1',
+                }),
+            );
+            expect(mockWaitForDeployment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    application: 'app2',
+                }),
+            );
+        });
+
+        it('sets the output for each application', async () => {
+            mockGetContext.mockReturnValue({
+                repo: {
+                    owner: 'owner',
+                    repo: 'repo',
+                },
+                sha: 'sha',
+            } as any);
+
+            mockGetInputs.mockReturnValue({
+                ...defaultInputs,
+                applications: 'app1, app2',
+            });
+
+            mockWaitForDeployment.mockResolvedValue({
+                url: 'http://example.com',
+                jwt: 'jwt',
+                path: '/',
+            });
+
+            await run();
+
+            expect(mockSetOutput).toHaveBeenCalledTimes(4);
+
+            expect(mockSetOutput).toHaveBeenCalledWith('APP1_URL', 'http://example.com');
+            expect(mockSetOutput).toHaveBeenCalledWith('APP1_VERCEL_JWT', 'jwt');
+
+            expect(mockSetOutput).toHaveBeenCalledWith('APP2_URL', 'http://example.com');
+            expect(mockSetOutput).toHaveBeenCalledWith('APP2_VERCEL_JWT', 'jwt');
+        });
     });
 });

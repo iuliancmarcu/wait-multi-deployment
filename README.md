@@ -24,9 +24,9 @@ Vercel password protection secret
 
 The name of the environment that was deployed to (e.g., "Preview" or "Production")
 
-#### `max_timeout_ms`
+#### `max_timeout`
 
-The timeout in milliseconds to be used when running each action step
+The timeout in seconds to be used when running each action step
 
 #### `allow_inactive_deployment`
 
@@ -36,12 +36,33 @@ Use the most recent inactive deployment (previously deployed preview) associated
 
 The path to check. Defaults to the index of the domain
 
-#### `check_interval_ms`
+#### `check_interval`
 
-How often (in milliseconds) should we make retry HTTP requests checking the deployment?
+How often in seconds should we make retry HTTP requests checking the deployment?
+
+#### `applications`
+
+**Optional** A comma-separated list of the applications to check for deployments. If not provided, the action will check for a deployment on the specified `environment`.
+
+#### `application_prefix`
+
+**Optional** A prefix to be applied to each application name when checking for deployments. To be used when the Vercel project name has a prefix compared to the application name.
 
 ### Outputs
 
-#### `deployment_urls`
+#### `URL`
 
-The URLs of the deployments
+When no `applications` are provided, the URL of the deployment will be outputted.
+
+#### `{application}_URL`
+
+When `applications` are provided, the URL of the deployment for each application will be outputed
+on the constant case of the application name, e.g., `my-application` -> `MY_APPLICATION_URL`.
+
+#### `VERCEL_JWT`
+
+The Vercel JWT token that can be used as an authentication header. This is outputted only if the `vercel_password` input is provided.
+
+#### `{application}_VERCEL_JWT`
+
+The Vercel JWT token for each application that can be used as an authentication header. This is outputted only if the `vercel_password` input is provided.
