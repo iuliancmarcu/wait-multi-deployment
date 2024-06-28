@@ -2,13 +2,10 @@ import { getOctokit } from '@actions/github';
 import { setOutput, setFailed } from '@actions/core';
 
 import { getPRHeadCommitSha } from './lib/getPRHeadCommitSha';
-import { waitForDeploymentCreate } from './lib/waitForDeploymentCreate';
-import { waitForDeploymentStatus } from './lib/waitForDeploymentStatus';
-import { waitForUrl } from './lib/waitForUrl';
 import { getInputs } from './inputs';
-import { log, logError } from './utils/log';
+import { logError } from './utils/log';
 import { getContext } from './utils/context';
-import { PromiseValue } from './utils/types';
+import { waitForDeployment } from './lib/waitForDeployment';
 
 export async function run() {
     try {
@@ -22,8 +19,7 @@ export async function run() {
             maxTimeoutMs,
             path,
             vercelPassword,
-            expectedApplications,
-            otherApplications,
+            applications,
         } = getInputs();
 
         const octokit = getOctokit(githubToken);
@@ -68,79 +64,25 @@ export async function run() {
             );
         }
 
-        // Get deployments associated with the pull request.
-        let deployment: PromiseValue<ReturnType<typeof waitForDeploymentCreate>>;
-        try {
-            deployment = await waitForDeploymentCreate({
-                octokit,
-                owner,
-                repo,
-                sha: latestCommitSha,
-                environment,
-                actorName,
-                maxTimeoutMs,
-                checkIntervalMs,
-            });
-        } catch (err) {
-            throw new Error(
-                `Check failure: Failed to find a deployment for actor "${actorName}". Exiting...`,
-                { cause: err },
-            );
-        }
-
-        let status: PromiseValue<ReturnType<typeof waitForDeploymentStatus>>;
-        try {
-            status = await waitForDeploymentStatus({
-                octokit,
-                owner,
-                repo,
-                deployment_id: deployment.id,
-                maxTimeoutMs,
-                allowInactive: allowInactiveDeployment,
-                checkIntervalMs,
-            });
-        } catch (err) {
-            throw new Error(
-                `Check failure: Failed to find a deployment status for deployment "${deployment.id}". Exiting...`,
-                { cause: err },
-            );
-        }
-
-        // Get target url
-        const targetUrl = status?.target_url;
-
-        if (!targetUrl) {
-            throw new Error(
-                'Check failure: No `target_url` was found in the status check. Exiting...',
-            );
-        }
-
-        log(`Found target url » ${targetUrl}`);
-
-        // Wait for url to respond with a success
-        log(`Waiting for a status code 200 from: ${targetUrl}`);
-
-        let urlCheckResult: PromiseValue<ReturnType<typeof waitForUrl>>;
-        try {
-            urlCheckResult = await waitForUrl({
-                url: targetUrl,
-                maxTimeoutMs,
-                checkIntervalMs,
-                vercelPassword,
-                path,
-            });
-        } catch (err) {
-            throw new Error(
-                `Check failure: Failed to get a successful response from "${targetUrl}". Exiting...`,
-                { cause: err },
-            );
-        }
+        const { url, jwt } = await waitForDeployment({
+            octokit,
+            owner,
+            repo,
+            sha,
+            environment,
+            actorName,
+            maxTimeoutMs,
+            checkIntervalMs,
+            allowInactiveDeployment,
+            vercelPassword,
+            path,
+        });
 
         // Set outputs for the next steps
-        setOutput('url', urlCheckResult.url);
+        setOutput('url', url);
 
-        if (urlCheckResult.jwt) {
-            setOutput('vercel_jwt', urlCheckResult.jwt);
+        if (jwt) {
+            setOutput('vercel_jwt', jwt);
         }
     } catch (error: any) {
         // Log the error for debugging

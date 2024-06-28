@@ -1,4 +1,4 @@
-name: 'Wait Multi Deployment'
+name: 'Wait Vercel Mono Deployment'
 description: 'GitHub Action that waits on multiple deployments of a PR and outputs their URLs'
 branding:
     icon: 'clock'
@@ -17,9 +17,9 @@ inputs:
     environment:
         description: 'The name of the environment that was deployed to (e.g., "Preview" or "Production")'
         required: false
-    max_timeout_ms:
-        description: 'The timeout in milliseconds to be used when running each action step'
-        default: '1200000'
+    max_timeout:
+        description: 'The timeout in seconds to be used when running each action step'
+        default: '600'
         required: false
     allow_inactive_deployment:
         description: 'Use the most recent inactive deployment (previously deployed preview) associated with the pull request if no new deployment is available.'
@@ -28,10 +28,13 @@ inputs:
         description: 'The path to check. Defaults to the index of the domain'
         default: '/'
         required: false
-    check_interval_ms:
-        description: 'How often (in milliseconds) should we make retry HTTP requests checking the deployment?'
-        default: '2000'
+    check_interval:
+        description: 'How often in seconds should we make retry HTTP requests checking the deployment?'
+        default: '2'
         required: false
+    applications:
+        description: 'Comma-separated list of application names to check for deployments. These application names should match the Vercel project name and GitHub Deplotments (eg. `my-app,my-app-staging`)'
+        required: true
 outputs:
     url:
         description: 'The fully qualified deploy preview URL'

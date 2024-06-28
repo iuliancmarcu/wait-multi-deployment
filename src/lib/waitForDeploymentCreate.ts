@@ -1,9 +1,18 @@
 import { getRetryCount } from '../utils/getRetryCount';
 import { log, logError } from '../utils/log';
+import { ArrayItem, PromiseValue } from '../utils/types';
 import { wait } from '../utils/wait';
 
+type Octokit = ReturnType<typeof import('@actions/github').getOctokit>;
+
+type ListDeploymentsResponse = PromiseValue<
+    ReturnType<Octokit['rest']['repos']['listDeployments']>
+>['data'];
+
+type Deployment = ArrayItem<ListDeploymentsResponse>;
+
 export interface IWaitForDeploymentCreateOptions {
-    octokit: ReturnType<typeof import('@actions/github').getOctokit>;
+    octokit: Octokit;
     owner: string;
     repo: string;
     sha: string;
@@ -11,6 +20,36 @@ export interface IWaitForDeploymentCreateOptions {
     actorName: string;
     maxTimeoutMs: number;
     checkIntervalMs: number;
+    application?: string;
+}
+
+async function getDeployment({
+    octokit,
+    owner,
+    repo,
+    sha,
+    environment,
+    actorName,
+    application,
+}: Pick<
+    IWaitForDeploymentCreateOptions,
+    'octokit' | 'owner' | 'repo' | 'sha' | 'environment' | 'actorName' | 'application'
+>): Promise<Deployment | undefined> {
+    let finalEnvironment = environment;
+    if (application) {
+        finalEnvironment = `${environment} – ${application}`;
+    }
+
+    const deployments = await octokit.rest.repos.listDeployments({
+        owner,
+        repo,
+        sha,
+        environment: finalEnvironment,
+    });
+
+    return deployments?.data?.find((d) => {
+        return d.creator?.login === actorName;
+    });
 }
 
 /**
@@ -29,23 +68,21 @@ export async function waitForDeploymentCreate({
     actorName,
     maxTimeoutMs,
     checkIntervalMs,
-}: IWaitForDeploymentCreateOptions) {
+    application,
+}: IWaitForDeploymentCreateOptions): Promise<Deployment> {
     const retries = getRetryCount(maxTimeoutMs, checkIntervalMs);
 
     for (let i = 0; i < retries; i++) {
         try {
-            const deployments = await octokit.rest.repos.listDeployments({
+            const deployment = await getDeployment({
+                octokit,
                 owner,
                 repo,
                 sha,
                 environment,
+                actorName,
+                application,
             });
-
-            const deployment =
-                deployments.data.length > 0 &&
-                deployments.data.find((d) => {
-                    return d.creator?.login === actorName;
-                });
 
             if (deployment) {
                 return deployment;

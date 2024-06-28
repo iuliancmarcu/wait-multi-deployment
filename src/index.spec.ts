@@ -3,9 +3,7 @@ import core, { setFailed, setOutput } from '@actions/core';
 
 import { IInputs, getInputs } from './inputs';
 import { getPRHeadCommitSha } from './lib/getPRHeadCommitSha';
-import { waitForDeploymentCreate } from './lib/waitForDeploymentCreate';
-import { waitForDeploymentStatus } from './lib/waitForDeploymentStatus';
-import { waitForUrl } from './lib/waitForUrl';
+import { waitForDeployment } from './lib/waitForDeployment';
 import { getContext } from './utils/context';
 
 import { run } from './index';
@@ -20,9 +18,7 @@ jest.mock('@actions/core', () => ({
 
 jest.mock('./inputs');
 jest.mock('./lib/getPRHeadCommitSha');
-jest.mock('./lib/waitForDeploymentCreate');
-jest.mock('./lib/waitForDeploymentStatus');
-jest.mock('./lib/waitForUrl');
+jest.mock('./lib/waitForDeployment');
 jest.mock('./utils/context');
 
 const defaultInputs: IInputs = {
@@ -44,13 +40,9 @@ describe('index - waitMultiDeployment', () => {
     const mockGetPRHeadCommitSha = getPRHeadCommitSha as jest.MockedFunction<
         typeof getPRHeadCommitSha
     >;
-    const mockWaitForDeploymentCreate = waitForDeploymentCreate as jest.MockedFunction<
-        typeof waitForDeploymentCreate
+    const mockWaitForDeployment = waitForDeployment as jest.MockedFunction<
+        typeof waitForDeployment
     >;
-    const mockWaitForDeploymentStatus = waitForDeploymentStatus as jest.MockedFunction<
-        typeof waitForDeploymentStatus
-    >;
-    const mockWaitForUrl = waitForUrl as jest.MockedFunction<typeof waitForUrl>;
     const mockGetContext = getContext as jest.MockedFunction<typeof getContext>;
 
     const mockGetOctokit = mockGithub.getOctokit;
@@ -160,84 +152,6 @@ describe('index - waitMultiDeployment', () => {
         );
     });
 
-    it('should fail the action when the deployment is not found', async () => {
-        mockGetContext.mockReturnValue({
-            repo: {
-                owner: 'owner',
-                repo: 'repo',
-            },
-            sha: 'sha',
-        } as any);
-
-        mockWaitForDeploymentCreate.mockRejectedValue(new Error('timeout'));
-
-        await run();
-
-        expect(setFailed).toHaveBeenCalledWith(
-            'Check failure: Failed to find a deployment for actor "actorName". Exiting...',
-        );
-    });
-
-    it('should fail the action when the deployment status is not successful', async () => {
-        mockGetContext.mockReturnValue({
-            repo: {
-                owner: 'owner',
-                repo: 'repo',
-            },
-            sha: 'sha',
-        } as any);
-
-        mockWaitForDeploymentCreate.mockResolvedValue({ id: 'my-deployment' } as any);
-        mockWaitForDeploymentStatus.mockRejectedValue(new Error('timeout'));
-
-        await run();
-
-        expect(setFailed).toHaveBeenCalledWith(
-            'Check failure: Failed to find a deployment status for deployment "my-deployment". Exiting...',
-        );
-    });
-
-    it('should fail the action when the deployment status has no target url', async () => {
-        mockGetContext.mockReturnValue({
-            repo: {
-                owner: 'owner',
-                repo: 'repo',
-            },
-            sha: 'sha',
-        } as any);
-
-        mockWaitForDeploymentCreate.mockResolvedValue({ id: 'my-deployment' } as any);
-        mockWaitForDeploymentStatus.mockResolvedValue({} as any);
-
-        await run();
-
-        expect(setFailed).toHaveBeenCalledWith(
-            'Check failure: No `target_url` was found in the status check. Exiting...',
-        );
-    });
-
-    it('should fail the action when the url check fails', async () => {
-        mockGetContext.mockReturnValue({
-            repo: {
-                owner: 'owner',
-                repo: 'repo',
-            },
-            sha: 'sha',
-        } as any);
-
-        mockWaitForDeploymentCreate.mockResolvedValue({ id: 'my-deployment' } as any);
-        mockWaitForDeploymentStatus.mockResolvedValue({
-            target_url: 'http://example.com',
-        } as any);
-        mockWaitForUrl.mockRejectedValue(new Error('timeout'));
-
-        await run();
-
-        expect(setFailed).toHaveBeenCalledWith(
-            'Check failure: Failed to get a successful response from "http://example.com". Exiting...',
-        );
-    });
-
     it('should set the vercel_jwt output when one is returned', async () => {
         mockGetContext.mockReturnValue({
             repo: {
@@ -247,19 +161,31 @@ describe('index - waitMultiDeployment', () => {
             sha: 'sha',
         } as any);
 
-        mockWaitForDeploymentCreate.mockResolvedValue({ id: 'my-deployment' } as any);
-        mockWaitForDeploymentStatus.mockResolvedValue({
-            target_url: 'http://example.com',
-        } as any);
-        mockWaitForUrl.mockResolvedValue({
+        mockWaitForDeployment.mockResolvedValue({
             url: 'http://example.com',
-            path: '/',
             jwt: 'jwt',
+            path: '/',
         });
 
         await run();
 
         expect(mockSetOutput).toHaveBeenCalledWith('vercel_jwt', 'jwt');
+    });
+
+    it('fails the action when waitForDeployment fails', async () => {
+        mockGetContext.mockReturnValue({
+            repo: {
+                owner: 'owner',
+                repo: 'repo',
+            },
+            sha: 'sha',
+        } as any);
+
+        mockWaitForDeployment.mockRejectedValue(new Error('failed to wait'));
+
+        await run();
+
+        expect(mockSetFailed).toHaveBeenCalledWith('failed to wait');
     });
 
     it('should set the url output when one is returned', async () => {
@@ -271,11 +197,7 @@ describe('index - waitMultiDeployment', () => {
             sha: 'sha',
         } as any);
 
-        mockWaitForDeploymentCreate.mockResolvedValue({ id: 'my-deployment' } as any);
-        mockWaitForDeploymentStatus.mockResolvedValue({
-            target_url: 'http://example.com',
-        } as any);
-        mockWaitForUrl.mockResolvedValue({
+        mockWaitForDeployment.mockResolvedValue({
             url: 'http://example.com',
             path: '/',
         });

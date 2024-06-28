@@ -8,8 +8,7 @@ export interface IInputs {
     maxTimeoutMs: number;
     checkIntervalMs: number;
     path: string;
-    expectedApplications?: string;
-    otherApplications?: string;
+    applications?: string;
     vercelPassword?: string;
 }
 
@@ -19,18 +18,20 @@ export function getInputs(): IInputs {
     const githubToken = core.getInput('github_token', { required: true });
     const vercelPassword = core.getInput('vercel_password');
     const environment = core.getInput('environment') || ENV_PREVIEW;
-    const maxTimeoutMs = Number(core.getInput('max_timeout_ms')) || 60;
     const allowInactiveDeployment =
         Boolean(core.getInput('allow_inactive_deployment')) || false;
     const path = core.getInput('path') || '/';
-    const checkIntervalMs = Number(core.getInput('check_interval_ms')) || 2000;
+    const maxTimeoutMs = (Number(core.getInput('max_timeout')) || 60) * 1000;
+    const checkIntervalMs = (Number(core.getInput('check_interval')) || 2) * 1000;
     const actorName = core.getInput('actor_name') || 'vercel[bot]';
-    const expectedApplications = core.getInput('expected_applications');
-    const otherApplications = core.getInput('other_applications');
+    const applications = core.getInput('applications');
 
     if (!githubToken) {
-        // Fail if we have don't have a github token
-        throw new Error('Input error: Required field `token` was not provided');
+        throw new Error('Input error: Required field `github_token` was not provided');
+    }
+
+    if (!applications) {
+        throw new Error('Input error: Required field `applications` was not provided');
     }
 
     return {
@@ -42,7 +43,6 @@ export function getInputs(): IInputs {
         allowInactiveDeployment,
         path,
         checkIntervalMs,
-        expectedApplications,
-        otherApplications,
+        applications,
     };
 }

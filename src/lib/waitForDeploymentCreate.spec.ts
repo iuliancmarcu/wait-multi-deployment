@@ -70,4 +70,31 @@ describe('waitForDeploymentCreate', () => {
             },
         });
     });
+
+    it('uses special environment if application is provided', async () => {
+        mockOctokit.rest.repos.listDeployments.mockResolvedValueOnce({
+            data: [
+                {
+                    deploymentData: 'foobar',
+                    creator: {
+                        login: 'test-actor',
+                    },
+                },
+            ],
+        });
+
+        await waitForDeploymentCreate({
+            ...options,
+            application: 'test-application',
+        });
+
+        const expectedEnvironment = 'test-environment – test-application';
+
+        expect(mockOctokit.rest.repos.listDeployments).toHaveBeenCalledWith({
+            owner: 'test-owner',
+            repo: 'test-repo',
+            sha: 'test-sha',
+            environment: expectedEnvironment,
+        });
+    });
 });
