@@ -1,4 +1,4 @@
-import { getOctokit } from '@actions/github';
+import * as github from '@actions/github';
 
 import { log } from '../utils/log';
 import { PromiseValue } from '../utils/types';
@@ -7,7 +7,7 @@ import { waitForDeploymentStatus } from './waitForDeploymentStatus';
 import { waitForUrl } from './waitForUrl';
 
 export interface IWaitForDeploymentOptions {
-    octokit: ReturnType<typeof getOctokit>;
+    octokit: ReturnType<typeof github.getOctokit>;
     owner: string;
     repo: string;
     sha: string;

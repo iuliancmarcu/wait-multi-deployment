@@ -1,11 +1,11 @@
-import { info, error } from '@actions/core';
+import * as core from '@actions/core';
 
 export function log(message: string) {
     if (process.env.NODE_ENV === 'test') {
         return;
     }
 
-    info(`[wait-vercel-mono-deployment] ${message}`);
+    core.info(`[wait-vercel-mono-deployment] ${message}`);
 }
 
 export function logError(e: any) {
@@ -13,5 +13,5 @@ export function logError(e: any) {
         return;
     }
 
-    error(`[wait-vercel-mono-deployment]`, e);
+    core.error(`[wait-vercel-mono-deployment]`, e);
 }

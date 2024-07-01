@@ -1,11 +1,11 @@
 {
     "name": "wait-vercel-mono-deployment",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "GitHub Action that waits on multiple deployments of a PR and outputs their URLs",
     "main": "dist/index.js",
     "scripts": {
         "test": "jest",
-        "build": "ncc build src/index.ts -o dist --minify",
+        "build": "ncc build src/index.ts -o dist --minify --source-map --license licenses.txt",
         "prepare": "husky"
     },
     "repository": {

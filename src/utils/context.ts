@@ -1,5 +1,5 @@
-import { context } from '@actions/github';
+import * as github from '@actions/github';
 
-export function getContext(): typeof context {
-    return context;
+export function getContext(): typeof github.context {
+    return github.context;
 }

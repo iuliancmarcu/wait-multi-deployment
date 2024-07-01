@@ -1,5 +1,5 @@
-import github from '@actions/github';
-import core, { setFailed, exportVariable } from '@actions/core';
+import * as github from '@actions/github';
+import * as core from '@actions/core';
 
 import { IInputs, getInputs } from './inputs';
 import { getPRHeadCommitSha } from './lib/getPRHeadCommitSha';
@@ -94,7 +94,7 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(setFailed).toHaveBeenCalledWith(
+        expect(core.setFailed).toHaveBeenCalledWith(
             'Missing information: Pull request detected but no PR number was found in payload. Exiting...',
         );
     });
@@ -131,7 +131,7 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(setFailed).toHaveBeenCalledWith(
+        expect(core.setFailed).toHaveBeenCalledWith(
             'Missing information: Failed to fetch the PR head commit SHA. Exiting...',
         );
     });
@@ -147,7 +147,7 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(setFailed).toHaveBeenCalledWith(
+        expect(core.setFailed).toHaveBeenCalledWith(
             'Missing information: Unable to determine SHA of the commit to check. Exiting...',
         );
     });

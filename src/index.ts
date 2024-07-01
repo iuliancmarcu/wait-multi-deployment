@@ -1,5 +1,5 @@
-import { getOctokit } from '@actions/github';
-import { setFailed, exportVariable } from '@actions/core';
+import * as github from '@actions/github';
+import * as core from '@actions/core';
 
 import { getPRHeadCommitSha } from './lib/getPRHeadCommitSha';
 import { getInputs } from './inputs';
@@ -24,7 +24,7 @@ export async function run() {
             applicationPrefix,
         } = getInputs();
 
-        const octokit = getOctokit(githubToken);
+        const octokit = github.getOctokit(githubToken);
 
         // Get context and extract repo and commit information
         const context = getContext();
@@ -118,7 +118,7 @@ export async function run() {
         logError(error);
 
         // Set the action as failed
-        setFailed(error.message);
+        core.setFailed(error.message);
     }
 }
 
@@ -137,10 +137,10 @@ async function setActionOutputs({
     );
 
     log(`Setting env variable: ${urlOutputKey}=${url}`);
-    exportVariable(urlOutputKey, url);
+    core.exportVariable(urlOutputKey, url);
     if (jwt) {
         log(`Setting env variable: ${urlOutputKey}=${url}`);
-        exportVariable(vercelJwtOutputKey, jwt);
+        core.exportVariable(vercelJwtOutputKey, jwt);
     }
     log('');
 }
