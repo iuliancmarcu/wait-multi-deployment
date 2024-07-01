@@ -1,15 +1,7 @@
 import { getRetryCount } from '../utils/getRetryCount';
 import { log, logError } from '../utils/log';
-import { ArrayItem, PromiseValue } from '../utils/types';
+import { Deployment, Octokit } from '../utils/types';
 import { wait } from '../utils/wait';
-
-type Octokit = ReturnType<typeof import('@actions/github').getOctokit>;
-
-type ListDeploymentsResponse = PromiseValue<
-    ReturnType<Octokit['rest']['repos']['listDeployments']>
->['data'];
-
-type Deployment = ArrayItem<ListDeploymentsResponse>;
 
 export interface IWaitForDeploymentCreateOptions {
     octokit: Octokit;
@@ -89,7 +81,7 @@ export async function waitForDeploymentCreate({
             }
 
             log(
-                `Could not find any deployments for actor ${actorName}, retrying (attempt ${
+                `Could not find any deployments for application "${application}", for actor "${actorName}", retrying (attempt ${
                     i + 1
                 } / ${retries})`,
             );

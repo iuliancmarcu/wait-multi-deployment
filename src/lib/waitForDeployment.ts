@@ -5,6 +5,7 @@ import { PromiseValue } from '../utils/types';
 import { waitForDeploymentCreate } from './waitForDeploymentCreate';
 import { waitForDeploymentStatus } from './waitForDeploymentStatus';
 import { waitForUrl } from './waitForUrl';
+import { getLatestDeployment } from './getLatestDeployment';
 
 export interface IWaitForDeploymentOptions {
     octokit: ReturnType<typeof github.getOctokit>;
@@ -16,6 +17,7 @@ export interface IWaitForDeploymentOptions {
     maxTimeoutMs: number;
     checkIntervalMs: number;
     allowInactiveDeployment: boolean;
+    useLatestDeployment: boolean;
     path: string;
     vercelPassword?: string;
     application?: string;
@@ -25,7 +27,12 @@ export async function waitForDeployment(options: IWaitForDeploymentOptions) {
     // Get deployments associated with the pull request.
     let deployment: PromiseValue<ReturnType<typeof waitForDeploymentCreate>>;
     try {
-        deployment = await waitForDeploymentCreate(options);
+        if (options.useLatestDeployment) {
+            log(`Using latest deployment for actor "${options.actorName}"`);
+            deployment = await getLatestDeployment(options);
+        } else {
+            deployment = await waitForDeploymentCreate(options);
+        }
     } catch (err) {
         throw new Error(
             `Check failure: Failed to find a deployment for actor "${options.actorName}"`,

@@ -24,6 +24,9 @@ inputs:
     allow_inactive_deployment:
         description: 'Use the most recent inactive deployment (previously deployed preview) associated with the pull request if no new deployment is available.'
         required: false
+    use_latest_deployment:
+        description: 'Use the most recent deployment associated with the application, regardless of the PR'
+        required: false
     path:
         description: 'The path to check. Defaults to the index of the domain'
         default: '/'

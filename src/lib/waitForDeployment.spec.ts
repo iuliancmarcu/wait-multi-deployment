@@ -1,3 +1,4 @@
+import { getLatestDeployment } from './getLatestDeployment';
 import { IWaitForDeploymentOptions, waitForDeployment } from './waitForDeployment';
 import { waitForDeploymentCreate } from './waitForDeploymentCreate';
 import { waitForDeploymentStatus } from './waitForDeploymentStatus';
@@ -6,6 +7,7 @@ import { waitForUrl } from './waitForUrl';
 const options: IWaitForDeploymentOptions = {
     actorName: 'test-actorName',
     allowInactiveDeployment: false,
+    useLatestDeployment: false,
     checkIntervalMs: 1000,
     environment: 'test-environment',
     maxTimeoutMs: 1000,
@@ -21,6 +23,7 @@ const options: IWaitForDeploymentOptions = {
 jest.mock('./waitForUrl');
 jest.mock('./waitForDeploymentCreate');
 jest.mock('./waitForDeploymentStatus');
+jest.mock('./getLatestDeployment');
 
 describe('waitForDeployment', () => {
     const mockWaitForDeploymentCreate = waitForDeploymentCreate as jest.MockedFunction<
@@ -32,6 +35,10 @@ describe('waitForDeployment', () => {
     >;
 
     const mockWaitForUrl = waitForUrl as jest.MockedFunction<typeof waitForUrl>;
+
+    const mockGetLatestDeployment = getLatestDeployment as jest.MockedFunction<
+        typeof getLatestDeployment
+    >;
 
     it('throws when the deployment is not found', async () => {
         mockWaitForDeploymentCreate.mockRejectedValue(new Error('timeout'));
@@ -83,5 +90,23 @@ describe('waitForDeployment', () => {
         const result = await waitForDeployment(options);
 
         expect(result).toEqual(urlCheckResult);
+    });
+
+    describe('when useLatestDeployment is true', () => {
+        it('uses the latest deployment', async () => {
+            const deployment = { id: 'my-deployment' } as any;
+            mockGetLatestDeployment.mockResolvedValue(deployment);
+
+            await waitForDeployment({ ...options, useLatestDeployment: true });
+
+            expect(mockGetLatestDeployment).toHaveBeenCalledWith({
+                ...options,
+                useLatestDeployment: true,
+            });
+            expect(waitForDeploymentCreate).not.toHaveBeenCalledWith({
+                ...options,
+                deployment_id: deployment.id,
+            });
+        });
     });
 });

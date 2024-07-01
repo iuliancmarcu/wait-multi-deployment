@@ -14,6 +14,7 @@ export async function run() {
         const {
             actorName,
             allowInactiveDeployment,
+            useLatestDeployment,
             checkIntervalMs,
             environment,
             githubToken,
@@ -81,6 +82,7 @@ export async function run() {
                         maxTimeoutMs,
                         checkIntervalMs,
                         allowInactiveDeployment,
+                        useLatestDeployment,
                         vercelPassword,
                         path,
                         application: `${applicationPrefix ?? ''}${application}`,
@@ -104,6 +106,7 @@ export async function run() {
                 maxTimeoutMs,
                 checkIntervalMs,
                 allowInactiveDeployment,
+                useLatestDeployment,
                 vercelPassword,
                 path,
             });

@@ -24,6 +24,7 @@ jest.mock('./utils/context');
 const defaultInputs: IInputs = {
     actorName: 'actorName',
     allowInactiveDeployment: true,
+    useLatestDeployment: false,
     checkIntervalMs: 1000,
     environment: 'environment',
     githubToken: 'githubToken',

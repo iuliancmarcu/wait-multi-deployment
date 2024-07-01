@@ -5,6 +5,7 @@ export interface IInputs {
     githubToken: string;
     environment: string;
     allowInactiveDeployment: boolean;
+    useLatestDeployment: boolean;
     maxTimeoutMs: number;
     checkIntervalMs: number;
     path: string;
@@ -21,6 +22,7 @@ export function getInputs(): IInputs {
     const environment = core.getInput('environment') || ENV_PREVIEW;
     const allowInactiveDeployment =
         Boolean(core.getInput('allow_inactive_deployment')) || false;
+    const useLatestDeployment = Boolean(core.getInput('use_latest_deployment')) || false;
     const path = core.getInput('path') || '/';
     const maxTimeoutMs = (Number(core.getInput('max_timeout')) || 60) * 1000;
     const checkIntervalMs = (Number(core.getInput('check_interval')) || 2) * 1000;
@@ -43,6 +45,7 @@ export function getInputs(): IInputs {
         environment,
         maxTimeoutMs,
         allowInactiveDeployment,
+        useLatestDeployment,
         path,
         checkIntervalMs,
         applications,
