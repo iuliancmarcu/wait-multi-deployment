@@ -144,3 +144,5 @@ async function setActionOutputs({
     }
     log('');
 }
+
+run();
