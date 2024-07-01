@@ -1,5 +1,5 @@
 name: 'Wait Vercel Mono Deployment'
-description: 'GitHub Action that waits on multiple deployments of a PR and outputs their URLs'
+description: 'GitHub Action that waits on multiple deployments of a PR and outputs their URLs as env variables'
 branding:
     icon: 'clock'
     color: 'green'
@@ -38,11 +38,6 @@ inputs:
     application_prefix:
         description: 'Prefix to be used when checking for deployments. This is useful when the Vercel project name is different from the Nx application name'
         required: false
-outputs:
-    url:
-        description: 'The fully qualified deploy preview URL'
-    vercel_jwt:
-        description: 'If the deployment is using password protection, this will be a JWT. Otherwise, outputs an empty string'
 runs:
     using: 'node20'
     main: 'dist/index.js'

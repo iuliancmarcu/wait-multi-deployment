@@ -1,5 +1,5 @@
 import github from '@actions/github';
-import core, { setFailed, setOutput } from '@actions/core';
+import core, { setFailed, exportVariable } from '@actions/core';
 
 import { IInputs, getInputs } from './inputs';
 import { getPRHeadCommitSha } from './lib/getPRHeadCommitSha';
@@ -12,7 +12,7 @@ jest.mock('@actions/github', () => ({
     getOctokit: jest.fn(),
 }));
 jest.mock('@actions/core', () => ({
-    setOutput: jest.fn(),
+    exportVariable: jest.fn(),
     setFailed: jest.fn(),
 }));
 
@@ -46,7 +46,7 @@ describe('index - waitMultiDeployment', () => {
     const mockGetContext = getContext as jest.MockedFunction<typeof getContext>;
 
     const mockGetOctokit = mockGithub.getOctokit;
-    const mockSetOutput = mockCore.setOutput;
+    const mockExportVariable = mockCore.exportVariable;
     const mockSetFailed = mockCore.setFailed;
 
     beforeEach(() => {
@@ -168,7 +168,7 @@ describe('index - waitMultiDeployment', () => {
         expect(mockSetFailed).toHaveBeenCalledWith('failed to wait');
     });
 
-    it('should set the vercel_jwt output when one is returned', async () => {
+    it('should set the vercel_jwt env when one is returned', async () => {
         mockGetContext.mockReturnValue({
             repo: {
                 owner: 'owner',
@@ -185,10 +185,10 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(mockSetOutput).toHaveBeenCalledWith('VERCEL_JWT', 'jwt');
+        expect(mockExportVariable).toHaveBeenCalledWith('VERCEL_JWT', 'jwt');
     });
 
-    it('should set the url output when one is returned', async () => {
+    it('should set the url env when one is returned', async () => {
         mockGetContext.mockReturnValue({
             repo: {
                 owner: 'owner',
@@ -204,7 +204,7 @@ describe('index - waitMultiDeployment', () => {
 
         await run();
 
-        expect(mockSetOutput).toHaveBeenCalledWith('URL', 'http://example.com');
+        expect(mockExportVariable).toHaveBeenCalledWith('URL', 'http://example.com');
     });
 
     describe('when applications are provided', () => {
@@ -281,7 +281,7 @@ describe('index - waitMultiDeployment', () => {
             );
         });
 
-        it('sets the output for each application', async () => {
+        it('sets the env variables for each application', async () => {
             mockGetContext.mockReturnValue({
                 repo: {
                     owner: 'owner',
@@ -303,13 +303,19 @@ describe('index - waitMultiDeployment', () => {
 
             await run();
 
-            expect(mockSetOutput).toHaveBeenCalledTimes(4);
+            expect(mockExportVariable).toHaveBeenCalledTimes(4);
 
-            expect(mockSetOutput).toHaveBeenCalledWith('APP1_URL', 'http://example.com');
-            expect(mockSetOutput).toHaveBeenCalledWith('APP1_VERCEL_JWT', 'jwt');
+            expect(mockExportVariable).toHaveBeenCalledWith(
+                'APP1_URL',
+                'http://example.com',
+            );
+            expect(mockExportVariable).toHaveBeenCalledWith('APP1_VERCEL_JWT', 'jwt');
 
-            expect(mockSetOutput).toHaveBeenCalledWith('APP2_URL', 'http://example.com');
-            expect(mockSetOutput).toHaveBeenCalledWith('APP2_VERCEL_JWT', 'jwt');
+            expect(mockExportVariable).toHaveBeenCalledWith(
+                'APP2_URL',
+                'http://example.com',
+            );
+            expect(mockExportVariable).toHaveBeenCalledWith('APP2_VERCEL_JWT', 'jwt');
         });
     });
 });

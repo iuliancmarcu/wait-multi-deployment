@@ -1,9 +1,9 @@
 import { getOctokit } from '@actions/github';
-import { setOutput, setFailed } from '@actions/core';
+import { setFailed, exportVariable } from '@actions/core';
 
 import { getPRHeadCommitSha } from './lib/getPRHeadCommitSha';
 import { getInputs } from './inputs';
-import { logError } from './utils/log';
+import { log, logError } from './utils/log';
 import { getContext } from './utils/context';
 import { waitForDeployment } from './lib/waitForDeployment';
 import { toConstantCase } from './utils/toConstantCase';
@@ -136,8 +136,11 @@ async function setActionOutputs({
         application ? `${application}_vercel_jwt` : 'vercel_jwt',
     );
 
-    setOutput(urlOutputKey, url);
+    log(`Setting env variable: ${urlOutputKey}=${url}`);
+    exportVariable(urlOutputKey, url);
     if (jwt) {
-        setOutput(vercelJwtOutputKey, jwt);
+        log(`Setting env variable: ${urlOutputKey}=${url}`);
+        exportVariable(vercelJwtOutputKey, jwt);
     }
+    log('');
 }
