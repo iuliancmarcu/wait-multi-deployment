@@ -7,7 +7,6 @@ export interface IGetLatestDeploymentOptions {
     repo: string;
     environment: string;
     actorName: string;
-    application?: string;
 }
 
 export async function getLatestDeployment({
@@ -16,18 +15,12 @@ export async function getLatestDeployment({
     repo,
     environment,
     actorName,
-    application,
 }: IGetLatestDeploymentOptions): Promise<Deployment> {
     try {
-        let finalEnvironment = environment;
-        if (application) {
-            finalEnvironment = `${environment} – ${application}`;
-        }
-
         const deployments = await octokit.rest.repos.listDeployments({
             owner,
             repo,
-            environment: finalEnvironment,
+            environment,
         });
 
         const sortedDeployments = [...(deployments?.data ?? [])];
@@ -46,7 +39,7 @@ export async function getLatestDeployment({
         return latestDeployment;
     } catch (err) {
         throw new Error(
-            `Fetch failure: Failed to find latest deployment for application "${application}" and actor "${actorName}"`,
+            `Fetch failure: Failed to find latest deployment for environment "${environment}" and actor "${actorName}"`,
             { cause: err },
         );
     }

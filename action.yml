@@ -38,6 +38,9 @@ inputs:
     applications:
         description: 'Comma-separated list of application names to check for deployments. These application names should match the Vercel project name and GitHub Deplotments (eg. `my-app,my-app-staging`)'
         required: false
+    applications_paths:
+        description: 'Comma-separated list of `application_name:path` pairs to be used when checking the deployments status'
+        required: false
     application_prefix:
         description: 'Prefix to be used when checking for deployments. This is useful when the Vercel project name is different from the Nx application name'
         required: false

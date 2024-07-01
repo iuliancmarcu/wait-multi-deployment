@@ -10,6 +10,7 @@ export interface IInputs {
     checkIntervalMs: number;
     path: string;
     applications?: string;
+    applicationsPaths?: string;
     applicationPrefix?: string;
     vercelPassword?: string;
 }
@@ -28,6 +29,7 @@ export function getInputs(): IInputs {
     const checkIntervalMs = (Number(core.getInput('check_interval')) || 2) * 1000;
     const actorName = core.getInput('actor_name') || 'vercel[bot]';
     const applications = core.getInput('applications');
+    const applicationsPaths = core.getInput('applications_paths');
     const applicationPrefix = core.getInput('application_prefix');
 
     if (!githubToken) {
@@ -50,5 +52,6 @@ export function getInputs(): IInputs {
         checkIntervalMs,
         applications,
         applicationPrefix,
+        applicationsPaths,
     };
 }

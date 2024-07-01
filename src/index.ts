@@ -8,6 +8,8 @@ import { getContext } from './utils/context';
 import { waitForDeployment } from './lib/waitForDeployment';
 import { toConstantCase } from './utils/toConstantCase';
 
+const EN_DASH = '–';
+
 export async function run() {
     try {
         // Inputs
@@ -23,6 +25,7 @@ export async function run() {
             vercelPassword,
             applications,
             applicationPrefix,
+            applicationsPaths,
         } = getInputs();
 
         const octokit = github.getOctokit(githubToken);
@@ -69,23 +72,32 @@ export async function run() {
 
         if (applications && applications.length > 0) {
             const actualApplications = applications.split(',').map((app) => app.trim());
+            const actualPaths = Object.fromEntries(
+                applicationsPaths?.split(',').map((path) => path.trim().split(':')) ?? [],
+            );
 
             await Promise.all(
                 actualApplications.map(async (application) => {
+                    const finalPath = actualPaths[application] ?? path;
+
+                    let finalEnvironment = `${environment}`;
+                    if (application) {
+                        finalEnvironment = `${environment} ${EN_DASH} ${applicationPrefix ?? ''}${application}`;
+                    }
+
                     const { url, jwt } = await waitForDeployment({
                         octokit,
                         owner,
                         repo,
                         sha: latestCommitSha,
-                        environment,
                         actorName,
                         maxTimeoutMs,
                         checkIntervalMs,
                         allowInactiveDeployment,
                         useLatestDeployment,
                         vercelPassword,
-                        path,
-                        application: `${applicationPrefix ?? ''}${application}`,
+                        environment: finalEnvironment,
+                        path: finalPath,
                     });
 
                     await setActionOutputs({

@@ -12,7 +12,6 @@ export interface IWaitForDeploymentCreateOptions {
     actorName: string;
     maxTimeoutMs: number;
     checkIntervalMs: number;
-    application?: string;
 }
 
 async function getDeployment({
@@ -22,21 +21,15 @@ async function getDeployment({
     sha,
     environment,
     actorName,
-    application,
 }: Pick<
     IWaitForDeploymentCreateOptions,
-    'octokit' | 'owner' | 'repo' | 'sha' | 'environment' | 'actorName' | 'application'
+    'octokit' | 'owner' | 'repo' | 'sha' | 'environment' | 'actorName'
 >): Promise<Deployment | undefined> {
-    let finalEnvironment = environment;
-    if (application) {
-        finalEnvironment = `${environment} – ${application}`;
-    }
-
     const deployments = await octokit.rest.repos.listDeployments({
         owner,
         repo,
         sha,
-        environment: finalEnvironment,
+        environment,
     });
 
     return deployments?.data?.find((d) => {
@@ -60,7 +53,6 @@ export async function waitForDeploymentCreate({
     actorName,
     maxTimeoutMs,
     checkIntervalMs,
-    application,
 }: IWaitForDeploymentCreateOptions): Promise<Deployment> {
     const retries = getRetryCount(maxTimeoutMs, checkIntervalMs);
 
@@ -73,7 +65,6 @@ export async function waitForDeploymentCreate({
                 sha,
                 environment,
                 actorName,
-                application,
             });
 
             if (deployment) {
@@ -81,7 +72,7 @@ export async function waitForDeploymentCreate({
             }
 
             log(
-                `Could not find any deployments for application "${application}", for actor "${actorName}", retrying (attempt ${
+                `Could not find any deployments for environment "${environment}", for actor "${actorName}", retrying (attempt ${
                     i + 1
                 } / ${retries})`,
             );

@@ -20,7 +20,6 @@ export interface IWaitForDeploymentOptions {
     useLatestDeployment: boolean;
     path: string;
     vercelPassword?: string;
-    application?: string;
 }
 
 export async function waitForDeployment(options: IWaitForDeploymentOptions) {

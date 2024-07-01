@@ -235,12 +235,12 @@ describe('index - waitMultiDeployment', () => {
             expect(mockWaitForDeployment).toHaveBeenCalledTimes(2);
             expect(mockWaitForDeployment).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    application: 'app1',
+                    environment: expect.stringContaining('app1'),
                 }),
             );
             expect(mockWaitForDeployment).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    application: 'app2',
+                    environment: expect.stringContaining('app2'),
                 }),
             );
 
@@ -272,12 +272,12 @@ describe('index - waitMultiDeployment', () => {
             expect(mockWaitForDeployment).toHaveBeenCalledTimes(2);
             expect(mockWaitForDeployment).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    application: 'app1',
+                    environment: expect.stringContaining('app1'),
                 }),
             );
             expect(mockWaitForDeployment).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    application: 'app2',
+                    environment: expect.stringContaining('app2'),
                 }),
             );
         });

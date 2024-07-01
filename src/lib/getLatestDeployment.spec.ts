@@ -15,9 +15,8 @@ const options: IGetLatestDeploymentOptions = {
     octokit: mockOctokit as any,
     owner: 'my-org',
     repo: 'my-repo',
-    environment: 'production',
+    environment: 'production - my-app',
     actorName: 'john.doe',
-    application: 'my-app',
 };
 
 describe('getLatestDeployment', () => {
@@ -41,27 +40,7 @@ describe('getLatestDeployment', () => {
         expect(mockOctokit.rest.repos.listDeployments).toHaveBeenCalledWith({
             owner: options.owner,
             repo: options.repo,
-            environment: 'production – my-app',
-        });
-    });
-
-    it('calls listDeployments with the correct parameters when no application is provided', async () => {
-        mockOctokit.rest.repos.listDeployments.mockResolvedValueOnce({
-            data: [
-                {
-                    id: 3,
-                    created_at: '2022-01-03T00:00:00Z',
-                    creator: { login: 'john.doe' },
-                },
-            ],
-        });
-
-        await getLatestDeployment({ ...options, application: undefined });
-
-        expect(mockOctokit.rest.repos.listDeployments).toHaveBeenCalledWith({
-            owner: options.owner,
-            repo: options.repo,
-            environment: 'production',
+            environment: 'production - my-app',
         });
     });
 
@@ -84,7 +63,7 @@ describe('getLatestDeployment', () => {
         mockOctokit.rest.repos.listDeployments.mockResolvedValueOnce({ data: [] });
 
         await expect(getLatestDeployment(options)).rejects.toThrow(
-            'Fetch failure: Failed to find latest deployment for application "my-app" and actor "john.doe"',
+            'Fetch failure: Failed to find latest deployment for environment "production - my-app" and actor "john.doe"',
         );
     });
 
@@ -94,7 +73,7 @@ describe('getLatestDeployment', () => {
         );
 
         await expect(getLatestDeployment(options)).rejects.toThrow(
-            'Fetch failure: Failed to find latest deployment for application "my-app" and actor "john.doe"',
+            'Fetch failure: Failed to find latest deployment for environment "production - my-app" and actor "john.doe"',
         );
     });
 });

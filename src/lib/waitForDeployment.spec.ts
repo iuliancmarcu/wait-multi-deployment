@@ -16,7 +16,6 @@ const options: IWaitForDeploymentOptions = {
     path: '/',
     repo: 'test-repo',
     sha: 'test-sha',
-    application: 'test-application',
     vercelPassword: 'test-vercelPassword',
 };
 
