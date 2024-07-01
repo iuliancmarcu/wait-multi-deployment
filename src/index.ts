@@ -69,28 +69,30 @@ export async function run() {
         if (applications && applications.length > 0) {
             const actualApplications = applications.split(',').map((app) => app.trim());
 
-            for (const application of actualApplications) {
-                const { url, jwt } = await waitForDeployment({
-                    octokit,
-                    owner,
-                    repo,
-                    sha: latestCommitSha,
-                    environment,
-                    actorName,
-                    maxTimeoutMs,
-                    checkIntervalMs,
-                    allowInactiveDeployment,
-                    vercelPassword,
-                    path,
-                    application: `${applicationPrefix ?? ''}${application}`,
-                });
+            await Promise.all(
+                actualApplications.map(async (application) => {
+                    const { url, jwt } = await waitForDeployment({
+                        octokit,
+                        owner,
+                        repo,
+                        sha: latestCommitSha,
+                        environment,
+                        actorName,
+                        maxTimeoutMs,
+                        checkIntervalMs,
+                        allowInactiveDeployment,
+                        vercelPassword,
+                        path,
+                        application: `${applicationPrefix ?? ''}${application}`,
+                    });
 
-                await setActionOutputs({
-                    url,
-                    jwt,
-                    application,
-                });
-            }
+                    await setActionOutputs({
+                        url,
+                        jwt,
+                        application,
+                    });
+                }),
+            );
         } else {
             const { url, jwt } = await waitForDeployment({
                 octokit,

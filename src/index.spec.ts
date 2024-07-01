@@ -208,6 +208,44 @@ describe('index - waitMultiDeployment', () => {
     });
 
     describe('when applications are provided', () => {
+        it('fails the action when waitForDeployment fails for any application', async () => {
+            mockGetContext.mockReturnValue({
+                repo: {
+                    owner: 'owner',
+                    repo: 'repo',
+                },
+                sha: 'sha',
+            } as any);
+
+            mockGetInputs.mockReturnValue({
+                ...defaultInputs,
+                applications: 'app1, app2',
+            });
+
+            mockWaitForDeployment.mockResolvedValueOnce({
+                url: 'http://example.com',
+                jwt: 'jwt',
+                path: '/',
+            });
+            mockWaitForDeployment.mockRejectedValueOnce(new Error('failed to wait'));
+
+            await run();
+
+            expect(mockWaitForDeployment).toHaveBeenCalledTimes(2);
+            expect(mockWaitForDeployment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    application: 'app1',
+                }),
+            );
+            expect(mockWaitForDeployment).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    application: 'app2',
+                }),
+            );
+
+            expect(mockSetFailed).toHaveBeenCalledWith('failed to wait');
+        });
+
         it('waits for deployment for each application', async () => {
             mockGetContext.mockReturnValue({
                 repo: {
